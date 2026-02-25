@@ -131,12 +131,17 @@ function LLM_helper_flat_zip(targetDir)
         
         % Determine processing type
         if strcmpi(ext, '.mlx')
-            % Export MLX to M, then rename to TXT
+            % Export MLX to M, then save with normalized line endings
             tempMName = [name, '_temp_convert.m'];
             tempMPath = fullfile(stagingDir, tempMName);
             try
                 export(srcPath, tempMPath);
-                movefile(tempMPath, destPath);
+                
+                % Standardize line endings (CRLF/LF) and save as TXT
+                txtLines = readlines(tempMPath);
+                writelines(txtLines, destPath);
+                delete(tempMPath); % Clean up intermediate file
+                
                 logData(end+1, :) = {srcFileName, srcFolder, destName, 'Converted .mlx -> .txt'}; %#ok<AGROW>
             catch ME
                 fprintf('Error converting %s: %s\n', srcFileName, ME.message);
@@ -145,7 +150,15 @@ function LLM_helper_flat_zip(targetDir)
             
         elseif isTextFile(srcPath)
             % Normal Text/Code file -> Copy and rename to TXT
-            copyfile(srcPath, destPath);
+            try
+                % Standardize line endings (CRLF/LF) safely
+                txtLines = readlines(srcPath);
+                writelines(txtLines, destPath);
+            catch
+                % Fallback to binary copy if encoding causes readlines to fail
+                copyfile(srcPath, destPath); 
+            end
+            
             typeStr = sprintf('Text File (%s) -> .txt', ext);
             if isempty(ext), typeStr = 'Text File -> .txt'; end
             logData(end+1, :) = {srcFileName, srcFolder, destName, typeStr}; %#ok<AGROW>
