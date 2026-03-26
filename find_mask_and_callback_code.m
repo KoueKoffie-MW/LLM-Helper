@@ -66,10 +66,7 @@ function resultsTable = find_mask_and_callback_code(searchPath)
             
             % Clean up newlines to prevent rows from breaking in Excel
             resultsTable.CodeContent = regexprep(resultsTable.CodeContent, '[\r\n]+', ' ');
-            
-            save('Project_CodeScanResults.mat', 'resultsTable');
-            writetable(resultsTable, 'Project_CodeScanResults.xlsx');
-            fprintf('Finished scanning directory. Aggregate results saved to Project_CodeScanResults.mat and Project_CodeScanResults.xlsx\n');
+            fprintf('Finished scanning directory. Aggregate results retained in memory.\n');
         end
         return;
     end
@@ -159,13 +156,7 @@ function resultsTable = find_mask_and_callback_code(searchPath)
         
         % Clean up newlines to prevent rows from breaking in Excel
         resultsTable.CodeContent = regexprep(resultsTable.CodeContent, '[\r\n]+', ' ');
-        
-        % Optionally save to a .mat file or spreadsheet
-        savePathMAT = [modelName '_CodeScanResults.mat'];
-        savePathExcel = [modelName '_CodeScanResults.xlsx'];
-        save(savePathMAT, 'resultsTable');
-        writetable(resultsTable, savePathExcel);
-        fprintf('Found %d instances of code. Results saved to %s and %s\n', height(resultsTable), savePathMAT, savePathExcel);
+        fprintf('Found %d instances of code in model: %s\n', height(resultsTable), modelName);
     end
 
     % Close the model to free up memory, if we were the ones who loaded it
