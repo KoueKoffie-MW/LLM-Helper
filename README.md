@@ -23,6 +23,24 @@ A unified pipeline that parses a project and outputs an LLM-ingestible bundle.
 *   **Full Documentation Bundling**: Automatically includes all `.md` files from the project in the final archive.
 *   **Workspace Hygiene**: Automatically cleans up all temporary JSON fragments, image folders, and temporary PDFs after zipping. No `.mat` or `.xlsx` residue.
 
+## Understanding the JSON Data Model
+
+The generated `.json.txt` files are structured to provide a comprehensive and hierarchical view of the project, specifically optimized for LLM reasoning:
+
+*   **`ProjectArchitecture`**: 
+    *   **Logic**: Uses the `MLProjectParser` (from the legacy `Create JSON of Project.m`) to generate a full hierarchical tree of the MATLAB Project.
+    *   **Content**: Includes file dependencies, labels, and the project's folder structure. This provides the LLM with a high-level topographical map of the codebase.
+*   **`MasksAndCallbacks`**: 
+    *   **Logic**: Scrapes MATLAB code directly from Simulink block masks and library callbacks recursively.
+    *   **Content**: Contains code blocks associated with specific model paths, allowing the LLM to understand block logic that isn't stored in external `.m` files.
+*   **`SourceCode`**: 
+    *   **Logic**: A consolidated collection of all project-related source files.
+    *   **Content**:
+        *   **MATLAB Files (`.m`, `.mlx`)**: Live Scripts are automatically exported to plain-text `.m` format to ensure the LLM can read the underlying code.
+        *   **Spreadsheets (`.xlsx`, `.xls`)**: Multi-sheet parsing converts tabular data into CSV-formatted text chunks.
+        *   **Documentation (`.md`)**: Included as raw markdown.
+        *   **Binary/CAD**: Only metadata and file paths are included; binary content is excluded to prevent JSON corruption.
+
 ### Usage
 
 ```matlab
