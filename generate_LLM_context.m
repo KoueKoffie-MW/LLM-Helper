@@ -343,6 +343,45 @@ function generate_LLM_context(targetDir, varargin)
                 fprintf('  Error converting %s: %s\n', relPath, ME.message);
             end
             
+        elseif ismember(lower(ext), {'.xlsx', '.xls'})
+            % Handle Spreadsheets - Read all sheets
+            try
+                sNames = sheetnames(srcPath);
+                allSheetLines = {};
+                for sIdx = 1:length(sNames)
+                    sName = sNames{sIdx};
+                    T = readtable(srcPath, 'Sheet', sName, 'VariableNamingRule', 'preserve');
+                    
+                    if ~isempty(T)
+                        allSheetLines{end+1} = sprintf('--- Sheet: %s ---', sName); %#ok<AGROW>
+                        % Add Headers
+                        allSheetLines{end+1} = strjoin(T.Properties.VariableNames, ','); %#ok<AGROW>
+                        % Add Rows
+                        for r = 1:height(T)
+                            rowStr = cell(1, width(T));
+                            for c = 1:width(T)
+                                val = T{r, c};
+                                if iscell(val), val = val{1}; end
+                                if ismissing(val)
+                                    rowStr{c} = '';
+                                elseif isnumeric(val)
+                                    rowStr{c} = num2str(val);
+                                elseif isdatetime(val) || isduration(val) || isa(val, 'calendarDuration')
+                                    rowStr{c} = char(val);
+                                else
+                                    rowStr{c} = char(string(val));
+                                end
+                            end
+                            allSheetLines{end+1} = strjoin(rowStr, ','); %#ok<AGROW>
+                        end
+                        allSheetLines{end+1} = ''; %#ok<AGROW> % Space between sheets
+                    end
+                end
+                contentLines = allSheetLines;
+            catch ME
+                fprintf('  Error reading spreadsheet %s: %s\n', relPath, ME.message);
+            end
+            
         elseif isTextFile(srcPath)
             % Check file size: restrict to < 1MB to prevent JSON chunk breaking
             finfo = dir(srcPath);
