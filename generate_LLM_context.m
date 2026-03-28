@@ -491,6 +491,15 @@ function generate_LLM_context(targetDir, varargin)
     for k = 1:length(mdFiles)
         filesToZip{end+1} = fullfile(mdFiles(k).folder, mdFiles(k).name); %#ok<AGROW>
     end
+    
+    % Include all Office files (natively)
+    officeExts = {'*.docx', '*.doc', '*.pptx', '*.ppt', '*.xlsx', '*.xls'};
+    for eIdx = 1:length(officeExts)
+        offFiles = dir(fullfile(targetDir, '**', officeExts{eIdx}));
+        for k = 1:length(offFiles)
+            filesToZip{end+1} = fullfile(offFiles(k).folder, offFiles(k).name); %#ok<AGROW>
+        end
+    end
 
     % Consolidate HTML files into a single master PDF using modular helper
     pdfDocPath = consolidate_html_docs(targetDir, [prjBaseName '_Documentation.pdf']);
