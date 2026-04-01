@@ -63,6 +63,62 @@ The generated .json.txt files are structured to provide a comprehensive and hier
 * **Documentation (.md)**: Included as raw markdown 18\.  
 * **Binary/CAD**: Only metadata and file paths are included; binary content is excluded to prevent JSON corruption 18\.
 
+## 🏎️ Example Usage
+
+Run these commands in the MATLAB Command Window to generate context for your project.
+
+### 1. Generate Complete LLM Context Bundle
+The most common way to use this tool is to run the main pipeline. This will parse your project, extract images, consolidate documentation, and create the `.json.txt` and `.zip` archives.
+
+```matlab
+% Basic usage (uses defaults)
+generate_LLM_context;
+
+% Advanced usage with screenshot depth limit
+% MaxImageDepth = 2 captures the top-level and one level of subsystems
+generate_LLM_context('MaxImageDepth', 2);
+```
+
+### 2. Consolidate HTML Documentation Only
+If you only need to merge your project's HTML report files into a single high-fidelity PDF:
+
+```matlab
+% Manually specify HTML files and output name
+htmlFiles = ["doc/report1.html", "doc/report2.html"];
+outputPdf = "Consolidated_Docs.pdf";
+consolidate_html_docs(htmlFiles, outputPdf);
+```
+
+### 3. Quick Source Code Archive (Flat)
+To package all `.m` and `.mlx` files into a single flat `.zip` for rapid LLM scanning without folder nesting:
+
+```matlab
+LLM_helper_flat_zip;
+```
+
+### 4. Extract Simulink Masks and Callbacks
+To recursively find all code hidden inside Simulink block masks and callbacks:
+
+```matlab
+% Scans current directory and returns a structure with the code
+callbackData = find_mask_and_callback_code(pwd);
+```
+
+### 5. Structured Workspace Archive (Tree)
+To package your project while **preserving the original folder structure** inside the archive (useful for deep context):
+
+```matlab
+LLM_helper_mfiles_convert_and_zip;
+```
+
+### 6. Export Project Hierarchy as JSON Only
+If you only need a machine-readable map of the project structure (dependencies, folder tree) without extracting images or consolidating PDFs:
+
+```matlab
+% Directly creates a ProjectName_Architecture.json.txt file
+Create_JSON_OF_Project;
+```
+
 ## ⚙️ Requirements
 
 * 🖥️ **MATLAB R2022a or newer** 19\.  
